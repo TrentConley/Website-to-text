@@ -9,7 +9,7 @@ import os
 from threading import Thread
 from image_to_text import convert_image_to_text  # replace with your actual module and function
 
-def take_screenshots_and_convert_to_text(url, save_path, save_folder='images', ):
+def take_screenshots_and_convert_to_text(url, image_name, image_folder='images/', text_folder='text/'):
     # Configure WebDriver to run headlessly
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -40,11 +40,12 @@ def take_screenshots_and_convert_to_text(url, save_path, save_folder='images', )
             screenshot = driver.get_screenshot_as_png()
             
             # Save each slice with offset number
-            slice_save_path = f"{save_path}_{offset}.png"
+            new_name = f"{image_name}_{offset}"
+            slice_save_path = f"{image_folder}{new_name}.png"
             Image.open(io.BytesIO(screenshot)).save(slice_save_path)
 
             # Start a new thread to convert the image to text
-            thread = Thread(target=convert_image_to_text, args=(slice_save_path,))
+            thread = Thread(target=convert_image_to_text, args=(new_name,), kwargs={'image_folder': image_folder, 'text_folder': text_folder})
             thread.start()
             threads.append(thread)
         
@@ -61,5 +62,5 @@ def take_screenshots_and_convert_to_text(url, save_path, save_folder='images', )
 
 # Usage
 url = 'https://www.mamaknowsglutenfree.com/easy-gluten-free-bread'
-save_path = 'images/gluten-free-bread'
-take_screenshots_and_convert_to_text(url, save_path)
+iamge_name = 'gluten-free-bread'
+take_screenshots_and_convert_to_text(url, iamge_name)

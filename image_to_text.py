@@ -3,12 +3,12 @@ from google.cloud.vision_v1 import types
 import io
 import os
 
-def image_to_text(image_name, image_folder='images/', text_folder='text/'):
+def convert_image_to_text(image_name, image_folder='images/', text_folder='text/'):
     # Initialize the Vision API client
     client = vision_v1.ImageAnnotatorClient()
 
     # Read the image file
-    with io.open(image_folder + image_name, 'rb') as image_file:
+    with io.open(image_folder + image_name + '.png', 'rb') as image_file:
         content = image_file.read()
 
     image = vision_v1.Image(content=content)
