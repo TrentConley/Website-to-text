@@ -9,7 +9,7 @@ import os
 from threading import Thread
 from image_to_text import convert_image_to_text  # replace with your actual module and function
 
-def take_screenshots_and_convert_to_text(url, image_name, image_folder='images/', text_folder='text/'):
+def screenshot_and_convert(offset, image_name, image_folder, text_folder, url):
     # Configure WebDriver to run headlessly
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -23,35 +23,18 @@ def take_screenshots_and_convert_to_text(url, image_name, image_folder='images/'
         # Navigate to the URL
         driver.get(url)
         
-        # Press escape twice to possibly close pop-ups
-        actions = ActionChains(driver)
-        time.sleep(1)
-        actions.send_keys(Keys.ESCAPE).send_keys(Keys.ESCAPE).perform()
+        # Scroll to the offset
+        driver.execute_script(f"window.scrollTo(0, {offset});")
+        time.sleep(2)  # allow time for the page to settle
+        screenshot = driver.get_screenshot_as_png()
         
-        # Get scroll height
-        total_height = driver.execute_script("return document.body.scrollHeight")
-        
-        threads = []
+        # Save each slice with offset number
+        new_name = f"{image_name}_{offset}"
+        slice_save_path = f"{image_folder}{new_name}.png"
+        Image.open(io.BytesIO(screenshot)).save(slice_save_path)
 
-        for offset in range(0, total_height, 900):  # assuming each slice captures 900 pixels
-            print(offset)
-            driver.execute_script(f"window.scrollTo(0, {offset});")
-            time.sleep(2)  # allow time for the page to settle
-            screenshot = driver.get_screenshot_as_png()
-            
-            # Save each slice with offset number
-            new_name = f"{image_name}_{offset}"
-            slice_save_path = f"{image_folder}{new_name}.png"
-            Image.open(io.BytesIO(screenshot)).save(slice_save_path)
-
-            # Start a new thread to convert the image to text
-            thread = Thread(target=convert_image_to_text, args=(new_name,), kwargs={'image_folder': image_folder, 'text_folder': text_folder})
-            thread.start()
-            threads.append(thread)
-        
-        # Wait for all threads to finish
-        for thread in threads:
-            thread.join()
+        # Convert the image to text
+        convert_image_to_text(new_name, image_folder=image_folder, text_folder=text_folder)
     
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -59,6 +42,29 @@ def take_screenshots_and_convert_to_text(url, image_name, image_folder='images/'
     finally:
         # Close the browser
         driver.quit()
+
+def take_screenshots_and_convert_to_text(url, image_name, image_folder='images/', text_folder='text/'):
+    # Get scroll height
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--window-size=1920x1080")
+    driver = webdriver.Chrome(options=chrome_options)
+    driver.get(url)
+    total_height = driver.execute_script("return document.body.scrollHeight")
+    print(f"Total height is: {total_height}")
+    driver.quit()
+
+    offsets = range(0, total_height, 900)  # assuming each slice captures 900 pixels
+    threads = [Thread(target=screenshot_and_convert, args=(offset, image_name, image_folder, text_folder, url)) for offset in offsets]
+    
+    # Start all threads
+    for thread in threads:
+        thread.start()
+    
+    # Wait for all threads to finish
+    for thread in threads:
+        thread.join()
 
 # Usage
 url = 'https://www.mamaknowsglutenfree.com/easy-gluten-free-bread'
