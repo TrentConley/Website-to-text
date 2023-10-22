@@ -25,7 +25,13 @@ def screenshot_and_convert(offset, image_name, image_folder, text_folder, url):
         
         # Scroll to the offset
         driver.execute_script(f"window.scrollTo(0, {offset});")
-        time.sleep(2)  # allow time for the page to settle
+        
+        # Press escape to possibly close pop-ups
+        actions = ActionChains(driver)
+        time.sleep(1)  # allow time for the page to load
+        actions.send_keys(Keys.ESCAPE).perform()
+
+        time.sleep(1)  # allow time for the page to settle
         screenshot = driver.get_screenshot_as_png()
         
         # Save each slice with offset number
@@ -67,6 +73,6 @@ def take_screenshots_and_convert_to_text(url, image_name, image_folder='images/'
         thread.join()
 
 # Usage
-url = 'https://www.mamaknowsglutenfree.com/easy-gluten-free-bread'
-iamge_name = 'gluten-free-bread'
-take_screenshots_and_convert_to_text(url, iamge_name)
+# url = 'https://medium.com/blockchain/bitcoin-explained-91a868c65b27'
+# iamge_name = 'bitcoin'
+# take_screenshots_and_convert_to_text(url, iamge_name)
