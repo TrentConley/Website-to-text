@@ -3,7 +3,7 @@ import openai
 
 class InformationExtractor:
     def __init__(self):
-        self.api_key = os.getenv('OPENAI_API_KEY')
+        self.api_key = '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'
         if not self.api_key:
             raise ValueError("Missing OpenAI API Key")
         openai.api_key = self.api_key
@@ -26,7 +26,7 @@ class InformationExtractor:
     def extract_from_history(self, past_extractions, query):
         # Initialize an empty list to store the messages
         messages = [
-            {"role": "system", "content": "You are given a list of past extractions from screenshots of websites. The user is looking for their query in this pool of information. Even if you only capture part of it, return that. Keep your answers brief and just to the information they requested."},
+            {"role": "system", "content": "You are given a list of past extractions from screenshots of websites. The user is looking for their query in this pool of information. Keep your answers brief and just to the information they requested."},
         ]
 
         # Add each past extraction to the messages

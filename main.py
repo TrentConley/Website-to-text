@@ -9,6 +9,7 @@ import os
 from threading import Thread
 from image_to_text import convert_image_to_text  # replace with your actual module and function
 from info_extractor import InformationExtractor
+from concurrent.futures import ThreadPoolExecutor
 
 def screenshot_and_convert(offset, image_name, image_folder, text_folder, url, query):
     # Configure WebDriver to run headlessly
@@ -69,18 +70,24 @@ def take_screenshots_and_convert_to_text(url, image_name, query, image_folder='i
     driver.quit()
 
     offsets = range(0, total_height, 900)  # assuming each slice captures 900 pixels
-    threads = [Thread(target=screenshot_and_convert, args=(offset, image_name, image_folder, text_folder, url, query)) for offset in offsets]
-    
-    # Start all threads
-    for thread in threads:
-        thread.start()
-    
-    # Wait for all threads to finish
-    for thread in threads:
-        thread.join()
+    # Create a ThreadPoolExecutor
+    with ThreadPoolExecutor() as executor:
+        # Start all threads and collect their return values
+        futures = [executor.submit(screenshot_and_convert, offset, image_name, image_folder, text_folder, url, query) for offset in offsets]
+
+    # Wait for all threads to finish and collect their results
+    results = [future.result() for future in futures]
+
+    # Call the extract_from_history function with the results
+    extractor = InformationExtractor()
+    final_result = extractor.extract_from_history(results, query)
+
+    return final_result
+
 
 # Usage
-url = 'https://medium.com/blockchain/bitcoin-explained-91a868c65b27'
-iamge_name = 'bitcoin'
-query = 'What can I do with bitcoin?'
-take_screenshots_and_convert_to_text(url, iamge_name, query)
+url = 'https://sugarspunrun.com/vanilla-cake-recipe/'
+iamge_name = 'cake'
+query = 'Give me just the ingredients from the following.'
+info = take_screenshots_and_convert_to_text(url, iamge_name, query)
+print(info)
