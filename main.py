@@ -8,8 +8,9 @@ import io
 import os
 from threading import Thread
 from image_to_text import convert_image_to_text  # replace with your actual module and function
+from info_extractor import InformationExtractor
 
-def screenshot_and_convert(offset, image_name, image_folder, text_folder, url):
+def screenshot_and_convert(offset, image_name, image_folder, text_folder, url, query):
     # Configure WebDriver to run headlessly
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -41,6 +42,11 @@ def screenshot_and_convert(offset, image_name, image_folder, text_folder, url):
 
         # Convert the image to text
         convert_image_to_text(new_name, image_folder=image_folder, text_folder=text_folder)
+        with open(f"{text_folder}{new_name}.txt", "r") as file:
+            text = file.read()
+        extractor = InformationExtractor()
+        result = extractor.extract(query, text)
+        print(result)
     
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -48,8 +54,9 @@ def screenshot_and_convert(offset, image_name, image_folder, text_folder, url):
     finally:
         # Close the browser
         driver.quit()
+        return result
 
-def take_screenshots_and_convert_to_text(url, image_name, image_folder='images/', text_folder='text/'):
+def take_screenshots_and_convert_to_text(url, image_name, query, image_folder='images/', text_folder='text/'):
     # Get scroll height
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -62,7 +69,7 @@ def take_screenshots_and_convert_to_text(url, image_name, image_folder='images/'
     driver.quit()
 
     offsets = range(0, total_height, 900)  # assuming each slice captures 900 pixels
-    threads = [Thread(target=screenshot_and_convert, args=(offset, image_name, image_folder, text_folder, url)) for offset in offsets]
+    threads = [Thread(target=screenshot_and_convert, args=(offset, image_name, image_folder, text_folder, url, query)) for offset in offsets]
     
     # Start all threads
     for thread in threads:
@@ -73,6 +80,7 @@ def take_screenshots_and_convert_to_text(url, image_name, image_folder='images/'
         thread.join()
 
 # Usage
-# url = 'https://medium.com/blockchain/bitcoin-explained-91a868c65b27'
-# iamge_name = 'bitcoin'
-# take_screenshots_and_convert_to_text(url, iamge_name)
+url = 'https://medium.com/blockchain/bitcoin-explained-91a868c65b27'
+iamge_name = 'bitcoin'
+query = 'What can I do with bitcoin?'
+take_screenshots_and_convert_to_text(url, iamge_name, query)
