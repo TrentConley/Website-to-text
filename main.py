@@ -91,3 +91,5 @@ iamge_name = 'cake'
 query = 'Give me just the ingredients from the following.'
 info = take_screenshots_and_convert_to_text(url, iamge_name, query)
 print(info)
+
+# TODO take a screenshot of just half the page, get a wider window, etc. Will do after I create aws server to do this.
