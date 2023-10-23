@@ -3,7 +3,7 @@ import openai
 
 class InformationExtractor:
     def __init__(self):
-        self.api_key = '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'
+        self.api_key = os.getenv('OPENAI_API_KEY')
         if not self.api_key:
             raise ValueError("Missing OpenAI API Key")
         openai.api_key = self.api_key

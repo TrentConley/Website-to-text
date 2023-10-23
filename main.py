@@ -85,11 +85,17 @@ def take_screenshots_and_convert_to_text(url, image_name, query, image_folder='i
     return final_result
 
 
+def query_website(url, query):
+    website_name = url.split('//')[-1].split('/')[0].split('.')[0]  # Extract the name of the website from the url, excluding '.com'
+    return take_screenshots_and_convert_to_text(url, website_name, query)
+
+
+
 # Usage
-url = 'https://sugarspunrun.com/vanilla-cake-recipe/'
-iamge_name = 'cake'
-query = 'Give me just the ingredients from the following.'
-info = take_screenshots_and_convert_to_text(url, iamge_name, query)
-print(info)
+# url = 'https://sugarspunrun.com/vanilla-cake-recipe/'
+# iamge_name = 'cake'
+# query = 'Give me just the ingredients from the following.'
+# info = take_screenshots_and_convert_to_text(url, iamge_name, query)
+# print(info)
 
 # TODO take a screenshot of just half the page, get a wider window, etc. Will do after I create aws server to do this.
