@@ -13,18 +13,3 @@ print(soup.get_text())
 
 from bs4 import BeautifulSoup, NavigableString
 
-
-def extract_text(element):
-    if isinstance(element, NavigableString):
-        return element.strip()
-    else:
-        return " ".join([extract_text(e) for e in element.contents]).strip()
-
-
-# Fetch and parse HTML as before
-# ...
-
-soup = BeautifulSoup(html_content, "html.parser")
-
-# Extract all text
-all_text = extract_text(soup)
